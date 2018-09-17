@@ -18,3 +18,6 @@ def Default_matrix(n):
     T = T_matrix(n)
     I = I_matrix(n)
     return (np.kron(T,I) + np.kron(I,T))
+
+a = Default_matrix(3)
+print(a)
