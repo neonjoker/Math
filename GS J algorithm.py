@@ -13,7 +13,6 @@ def Jacobi_Method(A,b,e,Stop_Method):
                     tmp_x[i][0] = tmp_x[i][0] - A[i, j] * x[j][0]
             tmp_x[i][0] = tmp_x[i][0] / A[i, i]
         x = tmp_x.copy()
-    global tmp_1
     tmp_1 = x.copy()
     Move_Forward()
     if(Stop_Method != 2):
@@ -29,10 +28,11 @@ def Jacobi_Method(A,b,e,Stop_Method):
             def r(x1,x2):
                 return np.linalg.norm((x1-x2),ord = 2)
             def solve():
+                nonlocal tmp_1
                 while(r(x,tmp_1)>e):
                     Move_Forward()
                     tmp_1 = x.copy()
-                solve()
+            solve()
     elif(Stop_Method == 2):
         def r(x1,x2,x3):
             d1 = np.linalg.norm((x1-x2), ord = 2)
@@ -40,15 +40,17 @@ def Jacobi_Method(A,b,e,Stop_Method):
             return (d2*d2/(d1-d2))
         def solve():
             Move_Forward()
+            nonlocal tmp_1
             tmp_2 = tmp_1.copy()
             tmp_1 = x.copy()
             while(r(x,tmp_1,tmp_2)<e):
                 Move_Forward()
                 tmp_2 = tmp_1.copy()
                 tmp_1 = x.copy()
+        solve()
     return x
 
 A = Defaul_Matrix.Default_matrix(3)
 b = np.array([[1] for i in range(9)],dtype='float64')
-x = Jacobi_Method(A,b,1e-6,0)
+x = Jacobi_Method(A,b,1e-6,1)
 print(x)
