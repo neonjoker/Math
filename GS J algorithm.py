@@ -30,8 +30,8 @@ def Jacobi_Method(A,b,e,Stop_Method):
             def solve():
                 nonlocal tmp_1
                 while(r(x,tmp_1)>e):
-                    Move_Forward()
                     tmp_1 = x.copy()
+                    Move_Forward()
             solve()
     elif(Stop_Method == 2):
         def r(x1,x2,x3):
@@ -64,9 +64,10 @@ def Gauss_Method(A,b,e,Stop_Method):
     def Move_Forward():
         nonlocal x
         for i in range(n):
+            x[i][0] = b[i][0]
             for j in range(n):
                 if (j != i):
-                    x[i][0] = b[i][0] - A[i, j] * x[j][0]
+                    x[i][0] = x[i][0] - A[i, j] * x[j][0]
             x[i][0] = x[i][0] / A[i, i]
         x = x.copy()
     tmp_1 = x.copy()
@@ -86,8 +87,8 @@ def Gauss_Method(A,b,e,Stop_Method):
             def solve():
                 nonlocal tmp_1
                 while(r(x,tmp_1)>e):
-                    Move_Forward()
                     tmp_1 = x.copy()
+                    Move_Forward()
             solve()
     elif(Stop_Method == 2):
         def r(x1,x2,x3):
@@ -106,7 +107,10 @@ def Gauss_Method(A,b,e,Stop_Method):
         solve()
     return x
 
+'''Test of Gauss Method'''
+'''
 A = Defaul_Matrix.Default_matrix(3)
 b = np.array([[1] for i in range(9)],dtype='float64')
-x = Gauss_Method(A,b,1e-6,0)
+x = Gauss_Method(A,b,1e-6,2)
 print(x)
+'''
