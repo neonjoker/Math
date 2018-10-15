@@ -1,9 +1,10 @@
 import numpy as np
+import Defaul_Matrix
 
-def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
+def iterator(A,b,x,t,p,e,Move_Forward,Stop_Method=0):
     x = x.copy()
     tmp_1 = x.copy()
-    Move_Forward(x)
+    Move_Forward(x,t,p)
     if (Stop_Method != 2):
         if (Stop_Method == 0):
             def r():
@@ -12,7 +13,7 @@ def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
 
             def solve():
                 while (abs(r()) > e):
-                    Move_Forward(x)
+                    Move_Forward(x,t,p)
 
             solve()
         elif (Stop_Method == 1):
@@ -23,7 +24,7 @@ def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
                 nonlocal tmp_1
                 while (r(x, tmp_1) > e):
                     tmp_1 = x.copy()
-                    Move_Forward(x)
+                    Move_Forward(x,t,p)
 
             solve()
     elif (Stop_Method == 2):
@@ -33,12 +34,12 @@ def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
             return (d2 * d2 / (d1 - d2))
 
         def solve():
-            Move_Forward(x)
+            Move_Forward(x,t,p)
             nonlocal tmp_1
             tmp_2 = tmp_1.copy()
             tmp_1 = x.copy()
             while (r(x, tmp_1, tmp_2) < e):
-                Move_Forward(x)
+                Move_Forward(x,t,p)
                 tmp_2 = tmp_1.copy()
                 tmp_1 = x.copy()
 
@@ -64,6 +65,25 @@ def CG(A,b,e=1e-6,Stop_Method=0):
     x = np.zeros(n,dtype='float64')
     r = np.dot(A, b) - b
     p = np.copy(r)
+    def Move_Forward(x,r,p):
+        q = np.dot(A,p)
+        a = -np.dot(np.transpose(r),p)/np.dot(np.transpose(p),q)[0][0]
+        for i in range(n):
+            x[i] = x[i] + a * p[i][0]
+        for i in range(n):
+            r[i][0] + a * q[i][0]
+        beta = np.dot(np.transpose(r),q)[0][0]/np.dot(np.transpose(p),q)[0][0]
+        for i in range(n):
+            p[i][0] = -r[i][0] + beta * p[i][0]
+    res = iterator(A, b, x, r, p, e, Move_Forward, Stop_Method)
+    return res
+
+
+def CG(A,b,e=1e-6,Stop_Method=0):
+    n = b.size
+    x = np.zeros(n,dtype='float64')
+    r = np.dot(A, b) - b
+    p = np.copy(r)
     def Move_Forward(x):
         nonlocal r,p
         q = np.dot(A,p)
@@ -75,9 +95,8 @@ def CG(A,b,e=1e-6,Stop_Method=0):
         beta = np.dot(np.transpose(r),q)[0][0]/np.dot(np.transpose(p),q)[0][0]
         for i in range(n):
             p[i][0] = -r[i][0] + beta * p[i][0]
-    res = iterator(A, b, x, e, Move_Forward, Stop_Method)
+    res = iterator(A, b, x, r, p , e, Move_Forward, Stop_Method)
     return res
-
 
 from Defaul_Matrix import Default_matrix
 A = Default_matrix(3)
