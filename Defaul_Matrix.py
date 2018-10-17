@@ -1,12 +1,4 @@
 import numpy as np
-#==============this code added==================================================================:
-import sys
-sys.path.append("pycharm-debug-py3k.egg")
-import pydevd
-
-pydevd.settrace('118.25.22.221', port=15926, stdoutToServer=True,
-stderrToServer=True)
-#================================================================================================
 
 def T_matrix(n):
     t = np.zeros((n,n))
