@@ -21,8 +21,8 @@ def SSOR(A,b,e,w,x):
 
 import Defaul_Matrix
 
-A = Defaul_Matrix.Default_matrix(3)
-b = np.dot(A,np.array([[1] for i in range(9)],dtype='float64'))
-x = np.array([[0] for i in range(9)],dtype='float64')
+A = Defaul_Matrix.Default_matrix(40)
+b = np.dot(A,np.array([[1] for i in range(1600)],dtype='float64'))
+x = np.array([[0] for i in range(1600)],dtype='float64')
 Res = SSOR(A,b,1e-6,0,x)
 print(Res)

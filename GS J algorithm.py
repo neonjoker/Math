@@ -111,6 +111,6 @@ def Gauss_Method(A,b,e,Stop_Method):
 
 A = Defaul_Matrix.Default_matrix(32)
 b = np.dot(A,np.array([[1] for i in range(1024)],dtype='float64'))
-x = Gauss_Method(A,b,1e-6,2)
+x = Gauss_Method(A,b,1e-6,0)
 print(x)
 
