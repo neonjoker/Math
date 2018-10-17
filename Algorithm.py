@@ -1,6 +1,7 @@
 import numpy as np
 
 def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
+    x = x.copy()
     tmp_1 = x.copy()
     Move_Forward(x)
     if (Stop_Method != 2):
@@ -46,7 +47,7 @@ def iterator(A,b,x,e,Move_Forward,Stop_Method=0):
 
 def Gauss_Method(A,b,e=1e-6,Stop_Method=0):
     n = b.size
-    x = np.array([[0] for i in range(n)],dtype='float64')
+    x = np.zeros((n,1),dtype='float64')
     def Move_Forward(x):
         for i in range(n):
             x[i][0] = b[i][0]
@@ -58,8 +59,28 @@ def Gauss_Method(A,b,e=1e-6,Stop_Method=0):
     res = iterator(A,b,x,e,Move_Forward,Stop_Method)
     return res
 
+def CG(A,b,e=1e-6,Stop_Method=0):
+    n = b.size
+    x = np.zeros(n,dtype='float64')
+    r = np.dot(A, b) - b
+    p = np.copy(r)
+    def Move_Forward(x):
+        nonlocal r,p
+        q = np.dot(A,p)
+        a = -np.dot(np.transpose(r),p)/np.dot(np.transpose(p),q)[0][0]
+        for i in range(n):
+            x[i] = x[i] + a * p[i][0]
+        for i in range(n):
+            r[i][0] + a * q[i][0]
+        beta = np.dot(np.transpose(r),q)[0][0]/np.dot(np.transpose(p),q)[0][0]
+        for i in range(n):
+            p[i][0] = -r[i][0] + beta * p[i][0]
+    res = iterator(A, b, x, e, Move_Forward, Stop_Method)
+    return res
+
+
 from Defaul_Matrix import Default_matrix
 A = Default_matrix(3)
-b = np.array([[1] for i in range(9)])
-x = Gauss_Method(A,b)
-print(x)
+b = np.dot(A,np.array([[1] for i in range(9)]))
+res = CG(A,b)
+print(res)
