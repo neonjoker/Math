@@ -27,9 +27,9 @@ def r(A,b,x):
     return rest
 
 import Defaul_Matrix
-A = Defaul_Matrix.Default_matrix(3)
-b = np.dot(A,np.array([[1] for i in range(9)],dtype='float64'))
-x = np.array([[0] for i in range(9)],dtype='float64')
+A = Defaul_Matrix.Default_matrix(10)
+b = np.dot(A,np.array([[1] for i in range(100)],dtype='float64'))
+x = np.array([[0] for i in range(100)],dtype='float64')
 while(r(A,b,x)>1e-6):
     Res = Richardson(A,b,x,20)
     x = Res[0]
