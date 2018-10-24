@@ -26,11 +26,24 @@ def r(A,b,x):
     rest = np.linalg.norm((np.dot(A, x) - b), ord=2)
     return rest
 
+def res(x):
+    n = x.size
+    rest = np.linalg.norm(np.array([[1] for i in range(n)]) - x, ord=2)
+    return rest
+
 import Defaul_Matrix
-A = Defaul_Matrix.Default_matrix(3)
-b = np.dot(A,np.array([[1] for i in range(9)],dtype='float64'))
-x = np.array([[0] for i in range(9)],dtype='float64')
-while(r(A,b,x)>1e-6):
-    Res = AccelJacobi(A,b,x,5)
-    x = Res[0]
-print(x)
+import csv
+def testOfAJ(m):
+    name = 'AccelJacobi_' + str(m) + '.csv'
+    AJOut = open(name, 'w', newline='')
+    Out = csv.writer(AJOut, dialect='excel')
+    A = Defaul_Matrix.Default_matrix(20)
+    b = np.dot(A,np.array([[1] for i in range(400)],dtype='float64'))
+    x = np.array([[0] for i in range(400)],dtype='float64')
+    while(r(A,b,x)>1e-6):
+        Res = AccelJacobi(A,b,x,m)
+        x = Res[0]
+        Out.writerow([res(x), r(A, b, x)])
+
+for m in [5, 6, 7, 8, 9, 10, 15, 20]:
+    testOfAJ(m)

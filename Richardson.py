@@ -5,32 +5,41 @@ def Richardson(A,b,x,m):
     n = b.size
     EigMax = 4 * (1-np.cos((np.sqrt(n)*np.pi)/(np.sqrt(n)+1)))
     EigMin = 4 * (1 - np.cos((np.pi) / (np.sqrt(n) + 1)))
-    G = np.diag(np.diag(np.ones_like(A))) - (2 / (EigMax + EigMin)) * A
-    g = (2 / (EigMin + EigMax)) * b
-    tmp_x = 2 / (EigMax + EigMin) * (b - np.dot(A, x))
-    Eig = np.linalg.eigvals(G)
-    EigMax = np.max(Eig)
-    EigMin = np.min(Eig)
-    ksi = (2 - EigMax - EigMin)/(EigMax - EigMin)
-    rho = 2.0
-    v = 2 / (2 - EigMax - EigMin)
     for i in range(m):
-        rho = 1 / (1 - (rho / (4 * ksi * ksi)))
-        tmp = (1 - rho) * x + rho * (v * (np.dot(G,tmp_x) + g) + (1 - v) * tmp_x)
-        x = np.copy(tmp_x)
-        tmp_x = np.copy(tmp)
-    return (tmp_x,x)
+        t = 1 / ((EigMax-EigMin)/2 * np.cos((2* i + 1) * np.pi / 2 * m) + (EigMin + EigMax)/2)
+        x = x + t * (b - np.dot(A,x))
+    return x
 
 
-def r(A,b,x):
+def r(x):
+    n = x.size
+    rest = np.linalg.norm(np.array([[1] for i in range(n)]) - x, ord=2)
+    return rest
+
+def res(A,b,x):
     rest = np.linalg.norm((np.dot(A, x) - b), ord=2)
     return rest
 
 import Defaul_Matrix
-A = Defaul_Matrix.Default_matrix(3)
-b = np.dot(A,np.array([[1] for i in range(9)],dtype='float64'))
-x = np.array([[0] for i in range(9)],dtype='float64')
-while(r(A,b,x)>1e-6):
-    Res = Richardson(A,b,x,20)
-    x = Res[0]
-print(x)
+import csv
+def testOfR(m):
+    name = 'Richardson_' + str(m) + '.csv'
+    RichardsonOut = open(name,'w',newline='')
+    Out = csv.writer(RichardsonOut,dialect='excel')
+    A = Defaul_Matrix.Default_matrix(20)
+    b = np.dot(A,np.array([[1] for i in range(400)],dtype='float64'))
+    x = np.array([[0] for i in range(400)],dtype='float64')
+    count = 0
+    while(r(x)>1e-6 and count<=1000):
+        Res = Richardson(A,b,x,m)
+        x = Res
+        count = count + 1
+        Out.writerow([r(x),res(A,b,x)])
+'''
+for m in [5,6,7,8,9,10,15,20]:
+    testOfR(m)
+'''
+testOfR(6)
+'''
+print(Richardson(Defaul_Matrix.Default_matrix(3),np.dot(Defaul_Matrix.Default_matrix(3),np.array([[1] for i in range(9)],dtype='float64')),np.array([[0] for i in range(9)],dtype='float64'),5))
+'''
