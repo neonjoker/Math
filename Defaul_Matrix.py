@@ -38,3 +38,32 @@ def Default_matrix(n):
     T = T_matrix(n)
     I = np.identity(n)
     return (np.kron(T,I) + np.kron(I,T))
+
+def Givens_Random(n):
+    sin = np.random.rand()
+    cos = np.sqrt(1 - sin * sin)
+    G = np.identity(n)
+    i = np.random.randint(0,n)
+    j = np.random.randint(0,n)
+    while(j == i):
+        j = np.random.randint(0,n)
+    (G[i,i],G[j,j]) = (cos,cos)
+    (G[i,j],G[j,i]) = (sin, -sin)
+    return G
+
+def Givens_RandomMultiply(dim,n=1):
+    G = np.identity(dim)
+    for k in range(n):
+        sin = np.random.rand()
+        cos = np.sqrt(1 - sin * sin)
+        i = np.random.randint(0, dim)
+        j = np.random.randint(0, dim)
+        while (j == i):
+            j = np.random.randint(0, dim)
+        for c in range(dim):
+            (a, b) = (G[j, c], G[i, c])
+            G[j, c] = cos * a + sin * b
+            G[i, c] = cos * b - sin * a
+    return G
+
+G = Givens_Random(2)
