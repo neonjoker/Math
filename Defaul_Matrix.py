@@ -65,5 +65,3 @@ def Givens_RandomMultiply(dim,n=1):
             G[j, c] = cos * a + sin * b
             G[i, c] = cos * b - sin * a
     return G
-
-G = Givens_Random(2)

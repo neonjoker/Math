@@ -53,7 +53,7 @@ def Householder(A):
 def Givens(A):
     (r, c) = np.shape(A)
     s = min(r,c)
-    Q = np.identity(s)
+    Q = np.identity(r)
     R = np.copy(A)
     for col in range(s - 1):
         for row in range(col+1 ,r):
