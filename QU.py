@@ -59,14 +59,6 @@ def Givens(A):
         for row in range(col+1 ,r):
             if (R[row, col] != 0):
                 r_ = np.hypot(R[col, col], R[row, col])  # d
-                '''if(abs(R[row,col])>=abs(R[col,col])):
-                    t = R[col,col] / R[row,col]
-                    sin = 1 / np.sqrt(1 + t * t)
-                    cos = sin * t
-                else:
-                    t = R[row,col] / R[col,col]
-                    cos = 1 / np.sqrt(1 + t * t)
-                    sin = cos * t'''
                 cos = R[col, col] / r_
                 sin = -R[row, col] / r_
                 rho = 1
