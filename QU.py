@@ -19,7 +19,7 @@ def MGS(A):
     n = A.shape[1]
     Q = A.copy()
     R = np.zeros((n,n))
-    for i in range(n):
+    for i in range(n-1):
         R[i,i] = np.linalg.norm(Q[:,i],ord = 2)
         Q[:,i] = Q[:,i] / R[i,i]
         for j in range(i+1,n):
@@ -30,70 +30,76 @@ def MGS(A):
     return (Q,R)
 
 def Householder(A):
-    n = A.shape[1]
-    m = A.shape[0]
-    d = np.zeros(n)
-    Q = A.copy()
-    for k in range(n-1):
-        delta = - sgn(Q[k,k]) * np.linalg.norm(Q[k:,k],ord = 2)
-        h = delta - Q[k,k]
-        Q[k,k] = -h
-        d[k] = delta
-
-def Householder(A):
-    (m,n) = A.shape
-    s = min(n,m) - 1
-    d = np.zeros(s)
-    b = np.zeros(s)
-
-    def householder(a):
-        alpha = -sgn(a[0]) * np.linalg.norm(a,ord = 2)
-        b = alpha * alpha - alpha * a[0]
-        a[0] = a[0] - alpha
-        return (alpha,b)
-
-    def multiply_householder(a,b,u):
-        return  a - np.dot(np.transpose(u),a) / b * u
-
-    for i in range(s):
-        res = householder(A[i:m:,i])
-        d[i] = res[0]
-        b[i] = res[1]
-        for j in range(i+1,n):
-            A[i:m:,j] = A[i:m:,j] - np.dot(A[i:m:,i].T,A[i:m:,j])/ b[i] * A[i:m,i]
-    R = np.triu(A)
-    for i in range(s):
-        R[i,i] = d[i]
-    Q = np.identity(m)
-    for i in range(s):
-        for j in range(i,m):
-            Q[i:m:,j] = multiply_householder(Q[i:m:,j],b[i],A[i:m:,i])
-    return (Q,R)
-
-def Givens(A):
     (r, c) = np.shape(A)
     Q = np.identity(r)
     R = np.copy(A)
-    (rows, cols) = np.tril_indices(r, -1, c)
-    for (row, col) in zip(rows, cols):
-        if R[row, col] != 0:  # R[row, col]=0则c=1,s=0,R、Q不变
-            r_ = np.hypot(R[col, col], R[row, col])  # d
-            cos = R[col, col]/r_
-            sin = -R[row, col]/r_
-            for i in range(c):
-                (a,b) = (R[col,i],R[row,i])
+    s = min(r,c)
+    D = np.zeros(s - 1)
+    for cnt in range(s - 1):
+        D[cnt] = np.linalg.norm(R[cnt:,cnt])
+        R[cnt,cnt] = (R[cnt,cnt] - D[cnt])
+        R[cnt:,cnt] = R[cnt:,cnt] / np.linalg.norm(R[cnt:,cnt])
+        for i in range(cnt+1,c):
+            R[cnt:,i] = R[cnt:,i] - 2 * np.dot(R[cnt:,cnt].T,R[cnt:,i]) * R[cnt:,cnt]
 
-                R[col,i] = cos * a - sin * b
-                R[row,i] = cos * b + sin * a
-            (a, b) = (Q[:, col], Q[:, row])
-            Q[:,col] = cos * a - sin * b
-            Q[:,row] = cos * b + sin * a
-
+    for cnt in range(s - 2,-1,-1):
+        for i in range(cnt,c):
+            Q[cnt:, i] = Q[cnt:, i] - 2 * np.dot(R[cnt:, cnt].T, Q[cnt:, i]) * R[cnt:, cnt]
+    for i in range(s-1):
+        R[i,i] = D[i]
+    R = np.triu(R)
     return (Q, R)
+
+def Givens(A):
+    (r, c) = np.shape(A)
+    s = min(r,c)
+    Q = np.identity(s)
+    R = np.copy(A)
+    for col in range(s - 1):
+        for row in range(col+1 ,r):
+            if (R[row, col] != 0):
+                r_ = np.hypot(R[col, col], R[row, col])  # d
+                '''if(abs(R[row,col])>=abs(R[col,col])):
+                    t = R[col,col] / R[row,col]
+                    sin = 1 / np.sqrt(1 + t * t)
+                    cos = sin * t
+                else:
+                    t = R[row,col] / R[col,col]
+                    cos = 1 / np.sqrt(1 + t * t)
+                    sin = cos * t'''
+                cos = R[col, col] / r_
+                sin = -R[row, col] / r_
+                rho = 1
+                if(cos != 0):
+                    if(abs(sin)<abs(cos)):
+                        rho = sgn(cos) * sin / 2
+                    else:
+                        rho = 2 * sgn(sin) / cos
+                (R[col,col],R[row,col]) = (r_,rho)
+                for i in range(col+1,c):
+                    (a, b) = (R[col, i], R[row, i])
+                    R[col, i] = cos * a - sin * b
+                    R[row, i] = cos * b + sin * a
+    for col in range(s-2,-1,-1):
+        for row in range(r-1,col,-1):
+            (cos,sin) = (0,1)
+            if(abs(R[row,col]) < 1):
+                sin = 2 * R[row,col]
+                cos = np.sqrt(1 - sin * sin)
+            else:
+                cos = 2 / R[row,col]
+                sin = np.sqrt(1 - cos * cos)
+            for i in range(col,c):
+                (a, b) = (Q[col, i], Q[row, i])
+                Q[col, i] = cos * a + sin * b
+                Q[row, i] = cos * b - sin * a
+    R = np.triu(R)
+    return (Q, R)
+
 '''
 from Defaul_Matrix import Default_matrix
 A = Default_matrix(3)
-res = givens_rotation(A)
+res = Givens(A)
 Q = res[0]
 R = res[1]
 print(R)
