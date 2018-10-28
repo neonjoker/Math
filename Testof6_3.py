@@ -114,7 +114,7 @@ import time
 import os
 import csv
 
-if(os.path.exists(os.getcwd()+'\\6_3result')):
+if not (os.path.exists(os.getcwd()+'\\6_3result')):
     os.mkdir(os.getcwd()+'\\6_3result')
 filename = os.getcwd() + '\\6_3result\\'
 '''
@@ -205,10 +205,10 @@ csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
 out = open(filename+'Givens_QR.csv', 'a', newline='')
 csv_write = csv.writer(out, dialect='excel')
 csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
-for i in range(20,31):
-    A = np.random.randint(3, 10) * np.random.rand(i, i)
+for k in range(20,31):
+    A = np.random.randint(3, 10) * np.random.rand(k, k)
     while(np.linalg.det(A)<0):
-        A = np.random.randint(3, 10) * np.random.rand(i, i)
+        A = np.random.randint(3, 10) * np.random.rand(k, k)
     '''CGS'''
     start = time.perf_counter()
     res = CGS(A)
@@ -222,7 +222,7 @@ for i in range(20,31):
     e = np.linalg.norm(A-np.dot(Q,R))/np.linalg.norm(A)
     out = open(filename + 'CGS_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
-    csv_write.writerow([i,t,e_i,e])
+    csv_write.writerow([k,t,e_i,e])
     '''MGS'''
     start = time.perf_counter()
     res = MGS(A)
@@ -236,7 +236,7 @@ for i in range(20,31):
     e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
     out = open(filename + 'MGS_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
-    csv_write.writerow([i, t, e_i, e])
+    csv_write.writerow([k, t, e_i, e])
     '''Householder'''
     start = time.perf_counter()
     res = Householder(A)
@@ -250,7 +250,7 @@ for i in range(20,31):
     e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
     out = open(filename + 'Householder_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
-    csv_write.writerow([i, t, e_i, e])
+    csv_write.writerow([k, t, e_i, e])
     '''Givens'''
     start = time.perf_counter()
     res = Givens(A)
@@ -264,4 +264,4 @@ for i in range(20,31):
     e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
     out = open(filename + 'Givens_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
-    csv_write.writerow([i, t, e_i, e])
+    csv_write.writerow([k, t, e_i, e])
