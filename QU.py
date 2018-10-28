@@ -34,6 +34,8 @@ def Householder(A):
     Q = np.identity(r)
     R = np.copy(A)
     s = min(r,c)
+    if(c<r):
+        s = s + 1
     D = np.zeros(s - 1)
     for cnt in range(s - 1):
         D[cnt] = np.linalg.norm(R[cnt:,cnt])
@@ -55,6 +57,8 @@ def Givens(A):
     s = min(r,c)
     Q = np.identity(r)
     R = np.copy(A)
+    if(c<r):
+        s = s + 1
     for col in range(s - 1):
         for row in range(col+1 ,r):
             if (R[row, col] != 0):

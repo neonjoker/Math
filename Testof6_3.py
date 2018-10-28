@@ -1,6 +1,9 @@
 from Defaul_Matrix import T_matrix
 import numpy as np
-import QU
+from QU import MGS
+from QU import CGS
+from QU import Householder
+from QU import Givens
 sgn = lambda x: 1 if x > 0 else -1 if x < 0 else 0
 
 def Generate_Question(n):
@@ -56,6 +59,8 @@ def Householder_solve(A,b):
     #Q = np.identity(r)
     R = np.copy(A)
     s = min(r,c)
+    if (c < r):
+        s = s + 1
     D = np.zeros(s - 1)
     for cnt in range(s - 1):
         D[cnt] = np.linalg.norm(R[cnt:,cnt])
@@ -65,20 +70,18 @@ def Householder_solve(A,b):
         for i in range(cnt+1,c):
             R[cnt:,i] = R[cnt:,i] - 2 * np.dot(R[cnt:,cnt].T,R[cnt:,i]) * R[cnt:,cnt]
 
-    '''
-    for cnt in range(s - 2,-1,-1):
-        for i in range(cnt,c):
-            Q[cnt:, i] = Q[cnt:, i] - 2 * np.dot(R[cnt:, cnt].T, Q[cnt:, i]) * R[cnt:, cnt]
-    '''
     for i in range(s-1):
         R[i,i] = D[i]
     R = np.triu(R)
+    s = min(r,c)
     x = solve_U(R[:s, :s], qb)
     return x
 
 def Givens_solve(A,b):
     (r, c) = np.shape(A)
     s = min(r,c)
+    if(c<r):
+        s = s + 1
     qb = b.copy()
     #Q = np.identity(r)
     R = np.copy(A)
@@ -102,28 +105,161 @@ def Givens_solve(A,b):
                     (a, b) = (R[col, i], R[row, i])
                     R[col, i] = cos * a - sin * b
                     R[row, i] = cos * b + sin * a
-    '''for col in range(s-2,-1,-1):
-        for row in range(r-1,col,-1):
-            (cos,sin) = (0,1)
-            if(abs(R[row,col]) < 1):
-                sin = 2 * R[row,col]
-                cos = np.sqrt(1 - sin * sin)
-            else:
-                cos = 2 / R[row,col]
-                sin = np.sqrt(1 - cos * cos)
-            for i in range(col,c):
-                (a, b) = (Q[col, i], Q[row, i])
-                Q[col, i] = cos * a + sin * b
-                Q[row, i] = cos * b - sin * a'''
     R = np.triu(R)
+    s = min(r,c)
     x = solve_U(R[:s,:s],qb)
     return x
 
+import time
+import os
+import csv
 
-Question = Generate_Question(10)
-A = Question[0]
-b = Question[1]
-'''
-x = np.linalg.solve(np.dot(A.T,A),np.dot(A.T,b))
-print(x)'''
+os.mkdir(os.getcwd()+'\\6_3result')
+filename = os.getcwd() + '\\6_3result\\'
+out = open(filename+'Basic.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','误差'])
+out = open(filename+'MGS.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','误差'])
+out = open(filename+'Householder.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','误差'])
+out = open(filename+'Givens.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','误差'])
 
+for i in range(100,501):
+    Question = Generate_Question(i)
+    A = Question[0]
+    b = Question[1]
+    r_x = np.ones((i-1))
+    '''法方程组'''
+    start = time.perf_counter()
+    x_1 = np.linalg.solve(np.dot(A.T, A), np.dot(A.T, b))
+    end = time.perf_counter()
+    t_1 = end - start
+    e_1 = np.linalg.norm(x_1 - r_x)
+    out = open(filename+'Basic.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i,t_1,e_1])
+    #print('法方程组解为:')
+    #print(x_1)
+    #print('耗时：', end='')
+    #print(t_1)
+
+    '''MGS'''
+    start = time.perf_counter()
+    res = MGS(A)
+    x_2 = solve_U(res[1], np.dot(res[0].T, b))
+    end = time.perf_counter()
+    t_2 = end - start
+    e_2 = np.linalg.norm(x_2 - r_x)
+    out = open(filename + 'MGS.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t_2, e_2])
+    #print('MGS解为:')
+    #print(x_2)
+    #print('耗时：', end='')
+    #print(t_2)
+
+    '''Householder'''
+    start = time.perf_counter()
+    x_3 = Householder_solve(A, b)
+    end = time.perf_counter()
+    t_3 = end - start
+    e_3 = np.linalg.norm(x_3 - r_x)
+    out = open(filename + 'Householder.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t_3, e_3])
+    #print('Householder解为:')
+    #print(x_3)
+    #print('耗时：', end='')
+    #print(t_3)
+
+    '''Givens'''
+    start = time.perf_counter()
+    x_4 = Givens_solve(A, b)
+    end = time.perf_counter()
+    t_4 = end - start
+    e_4 = np.linalg.norm(x_4 - r_x)
+    out = open(filename + 'Givens.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t_4, e_4])
+    #print('Givens解为:')
+    #print(x_4)
+    #print('耗时：', end='')
+    #print(t_4)
+
+out = open(filename+'CGS_QR.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
+out = open(filename+'MGS_QR.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
+out = open(filename+'Householder_QR.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
+out = open(filename+'Givens_QR.csv', 'a', newline='')
+csv_write = csv.writer(out, dialect='excel')
+csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
+for i in range(20,31):
+    A = np.random.randint(3, 10) * np.random.rand(i, i)
+    while(np.linalg.det(A)<0):
+        np.random.randint(3, 10) * np.random.rand(i, i)
+    '''CGS'''
+    start = time.perf_counter()
+    res = CGS(A)
+    end = time.perf_counter()
+    t = end - start
+    Q = res[0]
+    R = res[1]
+    I = np.dot(Q.T,Q)
+    i = np.identity(I.shape[0])
+    e_i = np.linalg.norm(I-i)
+    e = np.linalg.norm(A-np.dot(Q,R))/np.linalg.norm(A)
+    out = open(filename + 'CGS_QR.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i,t,e_i,e])
+    '''MGS'''
+    start = time.perf_counter()
+    res = MGS(A)
+    end = time.perf_counter()
+    t = end - start
+    Q = res[0]
+    R = res[1]
+    I = np.dot(Q.T, Q)
+    i = np.identity(I.shape[0])
+    e_i = np.linalg.norm(I - i)
+    e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
+    out = open(filename + 'MGS_QR.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t, e_i, e])
+    '''Householder'''
+    start = time.perf_counter()
+    res = Householder(A)
+    end = time.perf_counter()
+    t = end - start
+    Q = res[0]
+    R = res[1]
+    I = np.dot(Q.T, Q)
+    i = np.identity(I.shape[0])
+    e_i = np.linalg.norm(I - i)
+    e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
+    out = open(filename + 'Householder_QR.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t, e_i, e])
+    '''Givens'''
+    start = time.perf_counter()
+    res = Givens(A)
+    end = time.perf_counter()
+    t = end - start
+    Q = res[0]
+    R = res[1]
+    I = np.dot(Q.T, Q)
+    i = np.identity(I.shape[0])
+    e_i = np.linalg.norm(I - i)
+    e = np.linalg.norm(A - np.dot(Q, R))/np.linalg.norm(A)
+    out = open(filename + 'Givens_QR.csv', 'a', newline='')
+    csv_write = csv.writer(out, dialect='excel')
+    csv_write.writerow([i, t, e_i, e])
