@@ -114,8 +114,10 @@ import time
 import os
 import csv
 
-os.mkdir(os.getcwd()+'\\6_3result')
+if(os.path.exists(os.getcwd()+'\\6_3result')):
+    os.mkdir(os.getcwd()+'\\6_3result')
 filename = os.getcwd() + '\\6_3result\\'
+'''
 out = open(filename+'Basic.csv', 'a', newline='')
 csv_write = csv.writer(out, dialect='excel')
 csv_write.writerow(['矩阵阶数','CPU时间','误差'])
@@ -134,7 +136,7 @@ for i in range(100,501):
     A = Question[0]
     b = Question[1]
     r_x = np.ones((i-1))
-    '''法方程组'''
+    ''''''法方程组''''''
     start = time.perf_counter()
     x_1 = np.linalg.solve(np.dot(A.T, A), np.dot(A.T, b))
     end = time.perf_counter()
@@ -148,7 +150,7 @@ for i in range(100,501):
     #print('耗时：', end='')
     #print(t_1)
 
-    '''MGS'''
+    ''''''MGS''''''
     start = time.perf_counter()
     res = MGS(A)
     x_2 = solve_U(res[1], np.dot(res[0].T, b))
@@ -163,7 +165,7 @@ for i in range(100,501):
     #print('耗时：', end='')
     #print(t_2)
 
-    '''Householder'''
+    ''''''Householder''''''
     start = time.perf_counter()
     x_3 = Householder_solve(A, b)
     end = time.perf_counter()
@@ -177,7 +179,7 @@ for i in range(100,501):
     #print('耗时：', end='')
     #print(t_3)
 
-    '''Givens'''
+    ''''''Givens''''''
     start = time.perf_counter()
     x_4 = Givens_solve(A, b)
     end = time.perf_counter()
@@ -190,7 +192,7 @@ for i in range(100,501):
     #print(x_4)
     #print('耗时：', end='')
     #print(t_4)
-
+'''
 out = open(filename+'CGS_QR.csv', 'a', newline='')
 csv_write = csv.writer(out, dialect='excel')
 csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
@@ -206,7 +208,7 @@ csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
 for i in range(20,31):
     A = np.random.randint(3, 10) * np.random.rand(i, i)
     while(np.linalg.det(A)<0):
-        np.random.randint(3, 10) * np.random.rand(i, i)
+        A = np.random.randint(3, 10) * np.random.rand(i, i)
     '''CGS'''
     start = time.perf_counter()
     res = CGS(A)
