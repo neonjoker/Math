@@ -138,7 +138,9 @@ for i in range(100,501):
     r_x = np.ones((i-1))
     ''''''法方程组''''''
     start = time.perf_counter()
-    x_1 = np.linalg.solve(np.dot(A.T, A), np.dot(A.T, b))
+    L = np.linalg.cholesky(np.dot(A.T, A))
+    y = solve_L(L,np.dot(A.T,b))
+    x_1 = solve_U(L.T,y)
     end = time.perf_counter()
     t_1 = end - start
     e_1 = np.linalg.norm(x_1 - r_x)
@@ -192,7 +194,7 @@ for i in range(100,501):
     #print(x_4)
     #print('耗时：', end='')
     #print(t_4)
-'''
+
 out = open(filename+'CGS_QR.csv', 'a', newline='')
 csv_write = csv.writer(out, dialect='excel')
 csv_write.writerow(['矩阵阶数','CPU时间','正交性','向后稳定性'])
@@ -209,7 +211,7 @@ for k in range(20,31):
     A = np.random.randint(3, 10) * np.random.rand(k, k)
     while(np.linalg.det(A)<0):
         A = np.random.randint(3, 10) * np.random.rand(k, k)
-    '''CGS'''
+    ''''''CGS''''''
     start = time.perf_counter()
     res = CGS(A)
     end = time.perf_counter()
@@ -223,7 +225,7 @@ for k in range(20,31):
     out = open(filename + 'CGS_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
     csv_write.writerow([k,t,e_i,e])
-    '''MGS'''
+    ''''''MGS''''''
     start = time.perf_counter()
     res = MGS(A)
     end = time.perf_counter()
@@ -237,7 +239,7 @@ for k in range(20,31):
     out = open(filename + 'MGS_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
     csv_write.writerow([k, t, e_i, e])
-    '''Householder'''
+    ''''''Householder''''''
     start = time.perf_counter()
     res = Householder(A)
     end = time.perf_counter()
@@ -251,7 +253,7 @@ for k in range(20,31):
     out = open(filename + 'Householder_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
     csv_write.writerow([k, t, e_i, e])
-    '''Givens'''
+    ''''''Givens''''''
     start = time.perf_counter()
     res = Givens(A)
     end = time.perf_counter()
@@ -265,3 +267,4 @@ for k in range(20,31):
     out = open(filename + 'Givens_QR.csv', 'a', newline='')
     csv_write = csv.writer(out, dialect='excel')
     csv_write.writerow([k, t, e_i, e])
+'''
