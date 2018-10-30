@@ -116,6 +116,21 @@ if __name__ == '__main__':
     import os
     import csv
 
+    from Defaul_Matrix import cond_bad_matrix
+    from Defaul_Matrix import Givens_RandomMultiply
+    A = np.dot(np.dot(Givens_RandomMultiply(80,100),cond_bad_matrix(80)),Givens_RandomMultiply(80,100))
+    R1 = CGS(A)[1]
+    R2 = MGS(A)[1]
+    O = cond_bad_matrix(80)
+    out = open('C:\\Math\\6_3result\\CGSandMGS.csv', 'w', newline='')
+    csv_write = csv.writer(out,dialect='excel')
+    csv_write.writerow(['i','d','type'])
+    for i in range(80):
+        csv_write.writerow([i+1,R1[i,i],'CGS'])
+        csv_write.writerow([i + 1, R2[i, i], 'MGS'])
+        csv_write.writerow([i + 1, O[i, i], 'ORIGINAL'])
+
+'''
     if not (os.path.exists(os.getcwd() + '\\6_3result')):
         os.mkdir(os.getcwd() + '\\6_3result')
     filename = os.getcwd() + '\\6_3result\\'
@@ -270,3 +285,5 @@ if __name__ == '__main__':
         out = open(filename + 'Givens_QR.csv', 'a', newline='')
         csv_write = csv.writer(out, dialect='excel')
         csv_write.writerow([k, t, e_i, e])
+'''
+
