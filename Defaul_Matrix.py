@@ -65,3 +65,7 @@ def Givens_RandomMultiply(dim,n=1):
             G[j, c] = cos * a + sin * b
             G[i, c] = cos * b - sin * a
     return G
+
+def cond_bad_matrix(n):
+    return np.diag(np.array([1 / 2 ** k for k in range(1,n+1)]))
+
