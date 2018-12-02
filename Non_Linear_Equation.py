@@ -1,104 +1,219 @@
 from sympy import *
 import numpy as np
 
-def Newton(x_0,var,expr,TOL = 1e-10,m = 10000):
-    if(len(var) != len(expr)):
-        raise ValueError('len(x) != len(expr), Please check your input value.')
-    else:
-        dif = [[diff(expr[i],var[j]) for j in range(len(var))] for i in range(len(expr))]
-        dif = lambdify(var,dif)
-        f = lambdify(var,expr)
-        x = x_0
-        for k in range(m):
-            y = np.linalg.solve(np.array(dif(*x)), -np.array(f(*x)))
-            x = x + y
-            if(np.linalg.norm(y) < TOL):
-                return x
-        raise ValueError('Maximum number of iterations exceed')
-
-def Broyden(x_0,var,expr,TOL = 1e-10,m = 10000):
-    if(len(var) != len(expr)):
-        raise ValueError('len(var) != len(expr), Please check your input value.')
-    else:
-        dif = [[diff(expr[i],var[j]) for j in range(len(var))] for i in range(len(expr))]
-        dif = lambdify(var,dif)
-        f = lambdify(var,expr)
-        A, v, x = np.array(dif(*x_0)), np.array(f(*x_0)), x_0
-        H = np.linalg.inv(A)
-        s = -np.dot(H,v)
-        x = x + s
-        n = len(var)
-        for k in range(m):
-            w = v
-            v = np.array(f(*x))
-            y = v - w
-            z = -np.dot(H,y)
-            p = -np.dot(s,z)
-            if(p != 0):
-                C = p * np.identity(n) + np.outer(s + z,s)
-                H = (1 / p) * np.dot(C,H)
-                s = -np.dot(H,v)
-                x = x + s
-                if(np.linalg.norm(s) < TOL):
+def Newton(x_0,var,expr,TOL = 1e-10,m = 10000,out = True):
+    if(out != True):
+        if(len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i],var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var,dif)
+            f = lambdify(var,expr)
+            x = x_0
+            for k in range(m):
+                y = np.linalg.solve(np.array(dif(*x)), -np.array(f(*x)))
+                x = x + y
+                if(np.linalg.norm(y) < TOL):
                     return x
-            else:
-                raise ValueError('Method Failed')
-        raise ValueError('Maximum number of iterations exceeded.')
-
-def Modified_Newton(x_0,var,expr,r = 2,TOL = 1e-10,m = 10000):
-    if(len(var) != len(expr)):
-        raise ValueError('len(x) != len(expr), Please check your input value.')
+            raise ValueError('Maximum number of iterations exceed')
     else:
-        dif = [[diff(expr[i],var[j]) for j in range(len(var))] for i in range(len(expr))]
-        dif = lambdify(var,dif)
-        f = lambdify(var,expr)
-        x = x_0
-        for k in range(m):
-            B = np.linalg.inv(np.array(dif(*x)))
-            x_1 = x
-            for j in range(r):
-                x_1 = x_1 - np.dot(B,f(*x_1))
-            if(np.linalg.norm(x - x_1) < TOL):
-                return x
-            else:
+        if(len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i],var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var,dif)
+            f = lambdify(var,expr)
+            x = x_0
+            data = [x]
+            for k in range(m):
+                y = np.linalg.solve(np.array(dif(*x)), -np.array(f(*x)))
+                x = x + y
+                data.append(x)
+                if(np.linalg.norm(y) < TOL):
+                    return (x,data)
+            raise ValueError('Maximum number of iterations exceed')
+
+def Broyden(x_0,var,expr,TOL = 1e-10,m = 10000,out = False):
+    if(out != True):
+        if (len(var) != len(expr)):
+            raise ValueError('len(var) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i], var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var, dif)
+            f = lambdify(var, expr)
+            A, v, x = np.array(dif(*x_0)), np.array(f(*x_0)), x_0
+            H = np.linalg.inv(A)
+            s = -np.dot(H, v)
+            x = x + s
+            n = len(var)
+            for k in range(m):
+                w = v
+                v = np.array(f(*x))
+                y = v - w
+                z = -np.dot(H, y)
+                p = -np.dot(s, z)
+                if (p != 0):
+                    C = p * np.identity(n) + np.outer(s + z, s)
+                    H = (1 / p) * np.dot(C, H)
+                    s = -np.dot(H, v)
+                    x = x + s
+                    if (np.linalg.norm(s) < TOL):
+                        return x
+                else:
+                    raise ValueError('Method Failed')
+            raise ValueError('Maximum number of iterations exceeded.')
+    else:
+        if (len(var) != len(expr)):
+            raise ValueError('len(var) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i], var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var, dif)
+            f = lambdify(var, expr)
+            A, v, x = np.array(dif(*x_0)), np.array(f(*x_0)), x_0
+            data = [x]
+            H = np.linalg.inv(A)
+            s = -np.dot(H, v)
+            x = x + s
+            data.append(x)
+            n = len(var)
+            for k in range(m):
+                w = v
+                v = np.array(f(*x))
+                y = v - w
+                z = -np.dot(H, y)
+                p = -np.dot(s, z)
+                if (p != 0):
+                    C = p * np.identity(n) + np.outer(s + z, s)
+                    H = (1 / p) * np.dot(C, H)
+                    s = -np.dot(H, v)
+                    x = x + s
+                    data.append(x)
+                    if (np.linalg.norm(s) < TOL):
+                        return (x,data)
+                else:
+                    raise ValueError('Method Failed')
+            raise ValueError('Maximum number of iterations exceeded.')
+
+
+def Modified_Newton(x_0,var,expr,r = 2,TOL = 1e-10,m = 10000,out = False):
+    if(out != True):
+        if (len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i], var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var, dif)
+            f = lambdify(var, expr)
+            x = x_0
+            for k in range(m):
+                B = np.linalg.inv(np.array(dif(*x)))
+                x_1 = x
+                for j in range(r):
+                    y = np.dot(B, f(*x_1))
+                    x_1 = x_1 - y
+                    if(np.linalg.norm(y) < TOL):
+                        return x_1
                 x = x_1
-        raise ValueError('Maximum number of iterations exceed')
-
-def Discrete_Newton(x_0,var,expr,h,TOL = 1e-10,m = 10000):
-    if(len(var) != len(expr)):
-        raise ValueError('len(x) != len(expr), Please check your input value.')
+            raise ValueError('Maximum number of iterations exceed')
     else:
-        I = np.identity(len(var))
-        f = [lambdify(var,expr[i]) for i in range(len(expr))]
-        x = x_0
-        for k in range(m):
-            fx = [f[i](*x) for i in range(len(var))]
-            dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
-            y = np.linalg.solve(np.array(dif), -np.array(fx))
-            x = x + y
-            if(np.linalg.norm(y) < TOL):
-                return x
-        raise ValueError('Maximum number of iterations exceed')
+        if (len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            dif = [[diff(expr[i], var[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = lambdify(var, dif)
+            f = lambdify(var, expr)
+            x = x_0
+            data = [x]
+            for k in range(m):
+                B = np.linalg.inv(np.array(dif(*x)))
+                x_1 = x
+                for j in range(r):
+                    y = np.dot(B, f(*x_1))
+                    x_1 = x_1 - y
+                    data.append(x_1)
+                    if(np.linalg.norm(y) < TOL):
+                        return (x_1,data)
+                x = x_1
+            raise ValueError('Maximum number of iterations exceed')
 
-def Secant_2p(x_0,var,expr,h,TOL = 1e-10,m = 10000):
-    if(len(var) != len(expr)):
-        raise ValueError('len(x) != len(expr), Please check your input value.')
+
+def Discrete_Newton(x_0,var,expr,h,TOL = 1e-10,m = 10000,out = False):
+    if(out != True):
+        if(len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            I = np.identity(len(var))
+            f = [lambdify(var,expr[i]) for i in range(len(expr))]
+            x = x_0
+            for k in range(m):
+                fx = [f[i](*x) for i in range(len(var))]
+                dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
+                y = np.linalg.solve(np.array(dif), -np.array(fx))
+                x = x + y
+                if(np.linalg.norm(y) < TOL):
+                    return x
+            raise ValueError('Maximum number of iterations exceed')
     else:
-        I = np.identity(len(var))
-        f = [lambdify(var,expr[i]) for i in range(len(expr))]
-        x = x_0
-        fx = np.array([f[i](*x) for i in range(len(var))])
-        dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
-        y = np.linalg.solve(np.array(dif), -fx)
-        x = x + y
-        for k in range(m):
+        if (len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            I = np.identity(len(var))
+            f = [lambdify(var, expr[i]) for i in range(len(expr))]
+            x = x_0
+            data = [x]
+            for k in range(m):
+                fx = [f[i](*x) for i in range(len(var))]
+                dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
+                y = np.linalg.solve(np.array(dif), -np.array(fx))
+                x = x + y
+                data.append(x)
+                if (np.linalg.norm(y) < TOL):
+                    return (x, data)
+            raise ValueError('Maximum number of iterations exceed')
+
+
+def Secant_2p(x_0,var,expr,h,TOL = 1e-10,m = 10000,out = False):
+    if(out != True):
+        if(len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            I = np.identity(len(var))
+            f = [lambdify(var,expr[i]) for i in range(len(expr))]
+            x = x_0
             fx = np.array([f[i](*x) for i in range(len(var))])
-            dif = [[((f[i](*(x + y[j] * I[j])) - fx[i]) / y[j]) for j in range(len(var))] for i in range(len(expr))]
+            dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
             y = np.linalg.solve(np.array(dif), -fx)
             x = x + y
-            if(np.linalg.norm(y) < TOL):
-                return x
-        raise ValueError('Maximum number of iterations exceed')
+            for k in range(m):
+                fx = np.array([f[i](*x) for i in range(len(var))])
+                dif = [[((f[i](*(x + y[j] * I[j])) - fx[i]) / y[j]) for j in range(len(var))] for i in range(len(expr))]
+                y = np.linalg.solve(np.array(dif), -fx)
+                x = x + y
+                if(np.linalg.norm(y) < TOL):
+                    return x
+            raise ValueError('Maximum number of iterations exceed')
+    else:
+        if (len(var) != len(expr)):
+            raise ValueError('len(x) != len(expr), Please check your input value.')
+        else:
+            I = np.identity(len(var))
+            f = [lambdify(var, expr[i]) for i in range(len(expr))]
+            x = x_0
+            data = [x]
+            fx = np.array([f[i](*x) for i in range(len(var))])
+            dif = [[((f[i](*(x + h[i] * I[j])) - fx[i]) / h[i]) for j in range(len(var))] for i in range(len(expr))]
+            y = np.linalg.solve(np.array(dif), -fx)
+            x = x + y
+            data.append(x)
+            for k in range(m):
+                fx = np.array([f[i](*x) for i in range(len(var))])
+                dif = [[((f[i](*(x + y[j] * I[j])) - fx[i]) / y[j]) for j in range(len(var))] for i in range(len(expr))]
+                y = np.linalg.solve(np.array(dif), -fx)
+                x = x + y
+                data.append(x)
+                if (np.linalg.norm(y) < TOL):
+                    return (x, data)
+            raise ValueError('Maximum number of iterations exceed')
+
 
 if __name__ == '__main__':
     x_1, x_2 ,x_3= symbols('x_1 x_2 x_3')
@@ -108,4 +223,4 @@ if __name__ == '__main__':
     expr = (expr1, expr2, expr3)
     var = (x_1,x_2,x_3)
     x_0 = np.array([0.1,0.1,-0.1])
-    print(Broyden(x_0, var, expr))
+    print(Secant_2p(x_0, var, expr,1e-3 * np.ones(len(var)),out = True))
