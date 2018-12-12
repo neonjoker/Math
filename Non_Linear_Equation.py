@@ -1,7 +1,7 @@
 from sympy import *
 import numpy as np
 
-def Newton(x_0,var,expr,TOL = 1e-10,m = 10000,out = True):
+def Newton(x_0,var,expr,TOL = 1e-10,m = 10000,out = False):
     if(out != True):
         if(len(var) != len(expr)):
             raise ValueError('len(x) != len(expr), Please check your input value.')
@@ -216,6 +216,7 @@ def Secant_2p(x_0,var,expr,h,TOL = 1e-10,m = 10000,out = False):
 
 
 if __name__ == '__main__':
+    '''
     x_1, x_2 ,x_3= symbols('x_1 x_2 x_3')
     expr1 = 3*x_1 - cos(x_2*x_3) - Integer(1)/2
     expr2 = x_1**2 - 81*(x_2+0.1)**2 + sin(x_3) + 1.06
@@ -224,3 +225,31 @@ if __name__ == '__main__':
     var = (x_1,x_2,x_3)
     x_0 = np.array([0.1,0.1,-0.1])
     print(Secant_2p(x_0, var, expr,1e-3 * np.ones(len(var)),out = True))
+    '''
+    from Defaul_Matrix import T_matrix
+
+    def T_Eigfunc(l, *x):
+        n = len(x[0])
+        T = T_matrix(n)
+        x_ = x[0]
+        res = np.dot((T - l * np.identity(n)), x_)
+        return (np.append(res, np.dot(x_, x_) - 1))
+
+
+    def DifT_Eigfunc(l, *x):
+        n = len(x[0])
+        T = T_matrix(n) - l * np.identity(n)
+        return (np.column_stack((np.row_stack((T, 2 * x[0])), np.append(-1 * x[0], 0))))
+
+
+    x = np.array([1, 0, 0, 0, 0])
+    l = np.dot(np.dot(np.transpose(x), T_matrix(5)), x)
+    np.array(DifT_Eigfunc(l, x))
+
+    for k in range(10000):
+        y = np.linalg.solve(np.array(DifT_Eigfunc(l, x)), -np.array(T_Eigfunc(l, x)))
+        x = x + y[:-1]
+        l = l + y[-1]
+        if (np.linalg.norm(y) < 1e-6):
+            break
+    print(x, l)
